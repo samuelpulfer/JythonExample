@@ -1,40 +1,42 @@
 package ch.deluxxe.example;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
+
+import org.python.core.PyException;
+import org.python.core.PyInteger;
+import org.python.core.PyObject;
+import org.python.util.PythonInterpreter;
 
 public class HelloPython {
+
     /**
-     * @param args the command line arguments
-     */
-	public HelloPython() {
-		// TODO Auto-generated constructor stub
-	}
+    * @param args the command line arguments
+    */
+    public static void main(String[] args) throws PyException {
 
-    public static void main(String[] args) throws ScriptException {
-    	
-    	ScriptEngine engine = new ScriptEngineManager().getEngineByName("python");
+        // Create an instance of the PythonInterpreter
+        PythonInterpreter interp = new PythonInterpreter();
+        String currentlocation = HelloPython.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 
-        // Using the eval() method on the engine causes a direct
-        // interpretataion and execution of the code string passed into it
-        engine.eval("import sys");
-        engine.eval("print sys");
+        String PythonLib = currentlocation + "JythonScripts";
+        System.out.println(PythonLib);
 
-        // Using the put() method allows one to place values into
-        // specified variables within the engine
-        engine.put("a", "42");
+        // The exec() method executes strings of code
+        interp.exec("import sys, os");
+        interp.exec("sys.path.append('"+ PythonLib + "')");
+        interp.exec("print str(sys.path)");
+        interp.exec("import otherexample");
+        interp.exec("otherexample.testexample()");
 
-        // As you can see, once the variable has been set with
-        // a value by using the put() method, we an issue eval statements
-        // to use it.
-        engine.eval("print a");
-        engine.eval("x = 2 + 2");
+        // Set variable values within the PythonInterpreter instance
+        interp.set("a", new PyInteger(42));
+        interp.set("b", new PyInteger(7));
+        interp.exec("x = otherexample.add(a,b)");
 
-        // Using the get() method allows one to obtain the value
-        // of a specified variable from the engine instance
-        Object x = engine.get("x");
+        // Obtain the value of an object from the PythonInterpreter and store it
+        // into a PyObject.
+        PyObject x = interp.get("x");
         System.out.println("x: " + x);
+        interp.close();
     }
 
 }
